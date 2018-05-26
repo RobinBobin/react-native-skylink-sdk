@@ -6,7 +6,7 @@ import com.facebook.react.bridge.ReactContextBaseJavaModule;
 import com.facebook.react.bridge.ReactMethod;
 
 public class Module extends ReactContextBaseJavaModule {
-   private static final String TAG = "SkylinkSdk";
+   private static final String TAG = "SkylinkSDK";
    
    Module(ReactApplicationContext reactContext) {
       super(reactContext);

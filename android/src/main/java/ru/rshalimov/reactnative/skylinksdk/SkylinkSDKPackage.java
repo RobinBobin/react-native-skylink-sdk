@@ -9,10 +9,10 @@ import com.facebook.react.bridge.NativeModule;
 import com.facebook.react.bridge.ReactApplicationContext;
 import com.facebook.react.uimanager.ViewManager;
 
-public class RNSkylinkSdkPackage implements ReactPackage {
+public class SkylinkSDKPackage implements ReactPackage {
    @Override
    public List <ViewManager> createViewManagers(ReactApplicationContext reactContext) {
-      return Collections.emptyList();
+      return Arrays. <ViewManager> asList(new MyViewManager());
    }
    
    @Override

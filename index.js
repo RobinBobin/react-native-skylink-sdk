@@ -1,3 +1,9 @@
-import { NativeModules } from 'react-native';
+import { NativeModules } from "react-native";
+import MyView from "./MyView";
 
-export default NativeModules.SkylinkSdk;
+const sdk = NativeModules.SkylinkSDK;
+
+export default {
+   sdk,
+   MyView
+};
