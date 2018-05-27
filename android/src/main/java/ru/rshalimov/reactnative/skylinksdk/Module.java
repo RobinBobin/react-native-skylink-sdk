@@ -5,6 +5,9 @@ import com.facebook.react.bridge.ReactApplicationContext;
 import com.facebook.react.bridge.ReactContextBaseJavaModule;
 import com.facebook.react.bridge.ReactMethod;
 
+import sg.com.temasys.skylink.sdk.rtc.SkylinkConnection;
+import org.webrtc.SurfaceViewRenderer;
+
 public class Module extends ReactContextBaseJavaModule {
    private static final String TAG = "SkylinkSDK";
    
@@ -19,6 +22,7 @@ public class Module extends ReactContextBaseJavaModule {
    
    @ReactMethod
    public void func(Promise promise) {
-      promise.resolve(Integer.valueOf(42));
+      promise.resolve(SkylinkConnection.class.getName() + " " +
+         SurfaceViewRenderer.class.getName());
    }
 }
