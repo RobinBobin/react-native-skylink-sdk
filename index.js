@@ -1,9 +1,7 @@
-import { NativeModules } from "react-native";
-import MyView from "./MyView";
-
-const sdk = NativeModules.SkylinkSDK;
+import SDK from "./SDK";
+import SurfaceViewRenderer from "./SurfaceViewRenderer";
 
 export default {
-   sdk,
-   MyView
+   SDK,
+   SurfaceViewRenderer
 };
