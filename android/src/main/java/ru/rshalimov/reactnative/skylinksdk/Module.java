@@ -78,7 +78,7 @@ public class Module extends ReactContextBaseJavaModule {
    
    @ReactMethod
    public void init(String appKey, ReadableMap config, Promise promise) {
-      Log.d(TAG, String.format("init(%s, %s).", appKey, config));
+      Log.d(TAG, String.format("init(%s).", config));
       
       try {
          final ObjectPropertySetter <SkylinkConfig> cfg =
@@ -89,7 +89,10 @@ public class Module extends ReactContextBaseJavaModule {
          cfg.set("audioHighPassFilter", Boolean.class);
          cfg.set("audioNoiseSuppression", Boolean.class);
          cfg.set("audioStereo", Boolean.class);
-         cfg.setEnum("audioVideoReceiveConfig", SkylinkConfig.AudioVideoConfig.class);
+         
+         cfg.setEnum("audioVideoReceiveConfig",
+            SkylinkConfig.AudioVideoConfig.class);
+         
          cfg.setEnum("audioVideoSendConfig", SkylinkConfig.AudioVideoConfig.class);
          cfg.setEnum("defaultVideoDevice", SkylinkConfig.VideoDevice.class);
          cfg.set("enableLogs", Boolean.class);
@@ -145,8 +148,6 @@ public class Module extends ReactContextBaseJavaModule {
    
    @ReactMethod
    public void getVideoView(String peerId, Promise promise) {
-      Log.d(TAG, String.format("getVideoView('%s').", peerId));
-      
       final String common = String.format(" the video view for peer '%s'.", peerId);
       
       final SurfaceViewRenderer instance = SkylinkConnection.
@@ -162,8 +163,45 @@ public class Module extends ReactContextBaseJavaModule {
       } else {
          SurfaceViewRendererManager.setInstance(instance);
          
-         promise.resolve(String.format("Got%s", common));
+         promise.resolve(null);
       }
+   }
+   
+   @ReactMethod
+   public void connectToRoom(ReadableMap params, Promise promise) {
+      final Map <String, Object> map = params.toHashMap();
+      
+      final boolean secure = map.containsKey("connectionString");
+      final Object userData = map.get("userData");
+      
+      final StringBuilder sb = new StringBuilder("connectToRoom() ");
+      
+      if (secure) {
+         sb.append("with a connection string");
+      } else {
+         sb
+            .append("'")
+            .append(map.get("roomName"))
+            .append("'");
+      }
+      
+      sb
+         .append(" with user data '")
+         .append(userData)
+         .append("'.");
+      
+      Log.d(TAG, sb.toString());
+      
+      final SkylinkConnection connection = SkylinkConnection.getInstance();
+      
+      promise.resolve(secure ? connection.connectToRoom(map.get("connectionString").
+         toString(), userData) : connection.connectToRoom(map.get("secret").
+            toString(), map.get("roomName").toString(), userData));
+   }
+   
+   @ReactMethod
+   public void disconnectFromRoom(Promise promise) {
+      promise.resolve(SkylinkConnection.getInstance().disconnectFromRoom());
    }
    
    public static Module getInstance() {
