@@ -1,4 +1,5 @@
 import { NativeModules } from "react-native";
+import { EventHandlingHelper } from "react-native-common-utils";
 
 const sdk = NativeModules.SkylinkSDK;
 
@@ -34,3 +35,9 @@ export default class SDK {
       return sdk.disconnectFromRoom();
    }
 }
+
+const eventHandlingHelper = new EventHandlingHelper({
+   object: SDK,
+   nativeModule: sdk,
+   exportRemove: true
+});

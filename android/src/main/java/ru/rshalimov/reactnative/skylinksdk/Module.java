@@ -3,7 +3,6 @@ package ru.rshalimov.reactnative.skylinksdk;
 import com.facebook.react.bridge.Arguments;
 import com.facebook.react.bridge.Promise;
 import com.facebook.react.bridge.ReactApplicationContext;
-import com.facebook.react.bridge.ReactContextBaseJavaModule;
 import com.facebook.react.bridge.ReactMethod;
 import com.facebook.react.bridge.ReadableMap;
 import com.facebook.react.bridge.WritableArray;
@@ -19,12 +18,13 @@ import sg.com.temasys.skylink.sdk.rtc.SkylinkConnection;
 
 import org.webrtc.SurfaceViewRenderer;
 
+import ru.rshalimov.reactnative.common.BaseModule;
 import ru.rshalimov.reactnative.common.MapBuilder;
 import ru.rshalimov.reactnative.common.ObjectPropertySetter;
 
 import ru.rshalimov.reactnative.skylinksdk.listeners.LifeCycleListener;
 
-public class Module extends ReactContextBaseJavaModule {
+public class Module extends BaseModule {
    public static final String TAG = "SkylinkSDK";
    
    private static Module instance;
@@ -73,6 +73,16 @@ public class Module extends ReactContextBaseJavaModule {
             .push("audioCodec")
                .put("ISAC")
                .put("OPUS")
+            .pop()
+         .pop()
+         .push("events")
+            .push("lifeCycle")
+               .put(LifeCycleListener.LIFE_CYCLE_CONNECTED)
+               .put(LifeCycleListener.LIFE_CYCLE_DISCONNECTED)
+               .put(LifeCycleListener.LIFE_CYCLE_LOCK_ROOM_STATUS_CHANGED)
+               .put(LifeCycleListener.LIFE_CYCLE_LOG_RECEIVED)
+               .put(LifeCycleListener.LIFE_CYCLE_WARNING_RECEIVED)
+            .pop()
          .build();
    }
    
