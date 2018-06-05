@@ -1,6 +1,6 @@
 {
   "name": "react-native-skylink-sdk",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "description": "A native module wrapping Temasys SkylinkSDK for React Native",
   "main": "index.js",
   "scripts": {
