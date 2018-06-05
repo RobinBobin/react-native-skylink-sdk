@@ -27,6 +27,10 @@ export default class SDK {
       return sdk.getCaptureFormats(videoDevice);
    }
    
+   static async getVideoView(peerId) {
+      await sdk.getVideoView(peerId);
+   }
+   
    /*
       params = {
          secret: String,
@@ -41,6 +45,10 @@ export default class SDK {
    
    static disconnectFromRoom() {
       return sdk.disconnectFromRoom();
+   }
+   
+   static switchCamera() {
+      sdk.switchCamera();
    }
 }
 

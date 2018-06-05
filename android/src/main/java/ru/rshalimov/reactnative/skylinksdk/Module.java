@@ -19,6 +19,7 @@ import sg.com.temasys.skylink.sdk.rtc.SkylinkConnection;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
+
 import org.webrtc.SurfaceViewRenderer;
 
 import ru.rshalimov.reactnative.common.BaseModule;
@@ -27,6 +28,7 @@ import ru.rshalimov.reactnative.common.ObjectPropertySetter;
 
 import ru.rshalimov.reactnative.skylinksdk.listeners.LifeCycleListener;
 import ru.rshalimov.reactnative.skylinksdk.listeners.RemotePeerListener;
+import ru.rshalimov.reactnative.skylinksdk.listeners.MediaListener;
 
 public class Module extends BaseModule {
    public static final String TAG = "SkylinkSDK";
@@ -35,6 +37,7 @@ public class Module extends BaseModule {
    
    private final LifeCycleListener lifeCycleListener = new LifeCycleListener();
    private final RemotePeerListener remotePeerListener = new RemotePeerListener();
+   private final MediaListener mediaListener = new MediaListener();
    
    Module(ReactApplicationContext reactContext) {
       super(reactContext);
@@ -94,6 +97,10 @@ public class Module extends BaseModule {
                .put(RemotePeerListener.REMOTE_PEER_JOINED)
                .put(RemotePeerListener.REMOTE_PEER_LEFT)
                .put(RemotePeerListener.REMOTE_PEER_USER_DATA_RECEIVED)
+            .pop()
+            .push("media")
+               .put(MediaListener.MEDIA_LOCAL_MEDIA_CAPTURED)
+               .put(MediaListener.MEDIA_REMOTE_PEER_MEDIA_RECEIVED)
          .build();
    }
    
@@ -137,6 +144,7 @@ public class Module extends BaseModule {
          
          connection.setLifeCycleListener(lifeCycleListener);
          connection.setRemotePeerListener(remotePeerListener);
+         connection.setMediaListener(mediaListener);
          
          promise.resolve(null);
       } catch (Exception e) {
@@ -223,6 +231,11 @@ public class Module extends BaseModule {
    @ReactMethod
    public void disconnectFromRoom(Promise promise) {
       promise.resolve(SkylinkConnection.getInstance().disconnectFromRoom());
+   }
+   
+   @ReactMethod
+   public void switchCamera() {
+      SkylinkConnection.getInstance().switchCamera();
    }
    
    public static Module getInstance() {
