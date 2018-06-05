@@ -27,6 +27,14 @@ export default class SDK {
       return sdk.getCaptureFormats(videoDevice);
    }
    
+   /*
+      params = {
+         secret: String,
+         roomName: String,
+         connectionString: String,
+         userData: String | [] | {}
+      }
+   */
    static connectToRoom(params) {
       return sdk.connectToRoom(params);
    }

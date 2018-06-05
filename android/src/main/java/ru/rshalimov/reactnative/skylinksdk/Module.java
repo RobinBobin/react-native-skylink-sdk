@@ -8,6 +8,7 @@ import com.facebook.react.bridge.ReadableMap;
 import com.facebook.react.bridge.WritableArray;
 import com.facebook.react.bridge.WritableMap;
 
+import java.util.List;
 import java.util.Map;
 
 import android.util.Log;
@@ -16,6 +17,8 @@ import sg.com.temasys.skylink.sdk.rtc.SkylinkCaptureFormat;
 import sg.com.temasys.skylink.sdk.rtc.SkylinkConfig;
 import sg.com.temasys.skylink.sdk.rtc.SkylinkConnection;
 
+import org.json.JSONArray;
+import org.json.JSONObject;
 import org.webrtc.SurfaceViewRenderer;
 
 import ru.rshalimov.reactnative.common.BaseModule;
@@ -23,6 +26,7 @@ import ru.rshalimov.reactnative.common.MapBuilder;
 import ru.rshalimov.reactnative.common.ObjectPropertySetter;
 
 import ru.rshalimov.reactnative.skylinksdk.listeners.LifeCycleListener;
+import ru.rshalimov.reactnative.skylinksdk.listeners.RemotePeerListener;
 
 public class Module extends BaseModule {
    public static final String TAG = "SkylinkSDK";
@@ -30,6 +34,7 @@ public class Module extends BaseModule {
    private static Module instance;
    
    private final LifeCycleListener lifeCycleListener = new LifeCycleListener();
+   private final RemotePeerListener remotePeerListener = new RemotePeerListener();
    
    Module(ReactApplicationContext reactContext) {
       super(reactContext);
@@ -83,6 +88,12 @@ public class Module extends BaseModule {
                .put(LifeCycleListener.LIFE_CYCLE_LOG_RECEIVED)
                .put(LifeCycleListener.LIFE_CYCLE_WARNING_RECEIVED)
             .pop()
+            .push("remotePeer")
+               .put(RemotePeerListener.REMOTE_PEER_DATA_CONNECTION_OPENED)
+               .put(RemotePeerListener.REMOTE_PEER_CONNECTION_REFRESHED)
+               .put(RemotePeerListener.REMOTE_PEER_JOINED)
+               .put(RemotePeerListener.REMOTE_PEER_LEFT)
+               .put(RemotePeerListener.REMOTE_PEER_USER_DATA_RECEIVED)
          .build();
    }
    
@@ -125,6 +136,7 @@ public class Module extends BaseModule {
             getCurrentActivity().getApplicationContext());
          
          connection.setLifeCycleListener(lifeCycleListener);
+         connection.setRemotePeerListener(remotePeerListener);
          
          promise.resolve(null);
       } catch (Exception e) {
@@ -134,26 +146,22 @@ public class Module extends BaseModule {
    
    @ReactMethod
    public void getCaptureFormats(String videoDevice, Promise promise) {
-      try {
-         final WritableArray formats = Arguments.createArray();
+      final WritableArray formats = Arguments.createArray();
+      
+      for (SkylinkCaptureFormat format : SkylinkConnection.getInstance().
+         getCaptureFormats(SkylinkConfig.VideoDevice.valueOf(videoDevice)))
+      {
+         final WritableMap f = Arguments.createMap();
          
-         for (SkylinkCaptureFormat format : SkylinkConnection.getInstance().
-            getCaptureFormats(SkylinkConfig.VideoDevice.valueOf(videoDevice)))
-         {
-            final WritableMap f = Arguments.createMap();
-            
-            f.putInt("width", format.getWidth());
-            f.putInt("height", format.getHeight());
-            f.putInt("fpsMin", format.getFpsMin());
-            f.putInt("fpsMax", format.getFpsMax());
-            
-            formats.pushMap(f);
-         }
+         f.putInt("width", format.getWidth());
+         f.putInt("height", format.getHeight());
+         f.putInt("fpsMin", format.getFpsMin());
+         f.putInt("fpsMax", format.getFpsMax());
          
-         promise.resolve(formats);
-      } catch (Exception e) {
-         promise.reject("", e);
+         formats.pushMap(f);
       }
+      
+      promise.resolve(formats);
    }
    
    @ReactMethod
@@ -182,7 +190,10 @@ public class Module extends BaseModule {
       final Map <String, Object> map = params.toHashMap();
       
       final boolean secure = map.containsKey("connectionString");
-      final Object userData = map.get("userData");
+      final Object usrDt = map.get("userData");
+      
+      final Object userData = usrDt instanceof List ? new JSONArray((List <?>)
+         usrDt) : usrDt instanceof Map ? new JSONObject((Map <?, ?>)usrDt) : usrDt;
       
       final StringBuilder sb = new StringBuilder("connectToRoom() ");
       

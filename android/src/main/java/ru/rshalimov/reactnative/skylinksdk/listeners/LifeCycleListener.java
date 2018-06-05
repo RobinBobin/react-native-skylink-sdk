@@ -7,14 +7,16 @@ import ru.rshalimov.reactnative.skylinksdk.Module;
 
 import android.util.Log;
 
-public class LifeCycleListener implements sg.com.temasys.
-   skylink.sdk.listener.LifeCycleListener
+public class LifeCycleListener implements sg.com.
+   temasys.skylink.sdk.listener.LifeCycleListener
 {
    public static final String LIFE_CYCLE_CONNECTED;
    public static final String LIFE_CYCLE_DISCONNECTED;
    public static final String LIFE_CYCLE_LOCK_ROOM_STATUS_CHANGED;
    public static final String LIFE_CYCLE_LOG_RECEIVED;
    public static final String LIFE_CYCLE_WARNING_RECEIVED;
+   
+   private static final String TAG = "LifeCycleListener";
    
    static {
       LIFE_CYCLE_CONNECTED = "LIFE_CYCLE_CONNECTED";
@@ -26,7 +28,7 @@ public class LifeCycleListener implements sg.com.temasys.
    
    @Override
    public void onConnect(boolean isSuccessful, String message) {
-      Log.d(Module.TAG, String.format("onConnect() %s, %s", isSuccessful, message));
+      Log.d(TAG, String.format("onConnect() %s, %s", isSuccessful, message));
       
       final WritableMap params = Arguments.createMap();
       
@@ -38,7 +40,7 @@ public class LifeCycleListener implements sg.com.temasys.
    
    @Override
    public void onDisconnect(int errorCode, String message) {
-      Log.d(Module.TAG, String.format("onDisconnect() %d %s", errorCode, message));
+      Log.d(TAG, String.format("onDisconnect() %d %s", errorCode, message));
       
       final WritableMap params = Arguments.createMap();
       
@@ -50,7 +52,7 @@ public class LifeCycleListener implements sg.com.temasys.
    
    @Override
    public void onLockRoomStatusChange(String remotePeerId, boolean lockStatus) {
-      Log.d(Module.TAG, String.format("onLockRoomStatusChange() %s %s",
+      Log.d(TAG, String.format("onLockRoomStatusChange() %s %s",
          remotePeerId, lockStatus));
       
       final WritableMap params = Arguments.createMap();
@@ -63,7 +65,7 @@ public class LifeCycleListener implements sg.com.temasys.
    
    @Override
    public void onReceiveLog(int infoCode, String message) {
-      Log.d(Module.TAG, String.format("onReceiveLog() %d %s", infoCode, message));
+      Log.d(TAG, String.format("onReceiveLog() %d %s", infoCode, message));
       
       final WritableMap params = Arguments.createMap();
       
@@ -75,7 +77,7 @@ public class LifeCycleListener implements sg.com.temasys.
    
    @Override
    public void onWarning(int errorCode, String message) {
-      Log.d(Module.TAG, String.format("onWarning() %d %s", errorCode, message));
+      Log.d(TAG, String.format("onWarning() %d %s", errorCode, message));
       
       final WritableMap params = Arguments.createMap();
       
