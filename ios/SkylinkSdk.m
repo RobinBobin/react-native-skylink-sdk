@@ -16,5 +16,11 @@ _RCT_EXTERN_REMAP_METHOD(
    rejecter: (RCTPromiseRejectBlock)rejecter,
    NO)
 
+RCT_EXTERN_METHOD(
+   getCaptureFormats:
+   (NSString *)videoDevice
+   resolver: (RCTPromiseResolveBlock)resolver
+   rejecter: (RCTPromiseRejectBlock)rejecter)
+
 @end
   
