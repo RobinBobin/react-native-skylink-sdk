@@ -11,7 +11,7 @@ _RCT_EXTERN_REMAP_METHOD(
    init,
    initSDK:
    (NSString *)appKey
-   config: (NSDictikjhkjhonary *)config
+   config: (NSDictionary *)config
    resolver: (RCTPromiseResolveBlock)resolver
    rejecter: (RCTPromiseRejectBlock)rejecter,
    NO)
@@ -20,6 +20,19 @@ RCT_EXTERN_METHOD(
    getCaptureFormats:
    (NSString *)videoDevice
    resolver: (RCTPromiseResolveBlock)resolver
+   rejecter: (RCTPromiseRejectBlock)rejecter)
+
+RCT_EXTERN_METHOD(
+   connectToRoom:
+   (NSDictionary *)params,
+   resolver: (RCTPromiseResolveBlock)resolver
+   rejecter: (RCTPromiseRejectBlock)rejecter)
+
+RCT_EXTERN_METHOD(switchCamera:)
+
+RCT_EXTERN_METHOD(
+   disconnectFromRoom:
+   (RCTPromiseResolveBlock)resolver,
    rejecter: (RCTPromiseRejectBlock)rejecter)
 
 @end

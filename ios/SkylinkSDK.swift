@@ -8,48 +8,34 @@
 
 import Foundation
 
-let AUDIO_AND_VIDEO = "AUDIO_AND_VIDEO";
-let AUDIO_ONLY = "AUDIO_ONLY";
-let NO_AUDIO_NO_VIDEO = "NO_AUDIO_NO_VIDEO";
-let VIDEO_ONLY = "VIDEO_ONLY";
+let AUDIO_AND_VIDEO = "AUDIO_AND_VIDEO"
+let AUDIO_ONLY = "AUDIO_ONLY"
+let NO_AUDIO_NO_VIDEO = "NO_AUDIO_NO_VIDEO"
+let VIDEO_ONLY = "VIDEO_ONLY"
 
-let CAMERA_BACK = "CAMERA_BACK";
-let CAMERA_FRONT = "CAMERA_FRONT";
+let CAMERA_BACK = "CAMERA_BACK"
+let CAMERA_FRONT = "CAMERA_FRONT"
 
-let ILBC = "iLBC";
-let OPUS = "Opus";
+let ILBC = "iLBC"
+let OPUS = "Opus"
 
-let LIFE_CYCLE_CONNECTED = "LIFE_CYCLE_CONNECTED";
-let LIFE_CYCLE_DISCONNECTED = "LIFE_CYCLE_DISCONNECTED";
-let LIFE_CYCLE_LOCK_ROOM_STATUS_CHANGED = "LIFE_CYCLE_LOCK_ROOM_STATUS_CHANGED";
-let LIFE_CYCLE_LOG_RECEIVED = "LIFE_CYCLE_LOG_RECEIVED";
-let LIFE_CYCLE_WARNING_RECEIVED = "LIFE_CYCLE_WARNING_RECEIVED";
-
-let REMOTE_PEER_DATA_CONNECTION_OPENED = "REMOTE_PEER_DATA_CONNECTION_OPENED";
-let REMOTE_PEER_CONNECTION_REFRESHED = "REMOTE_PEER_CONNECTION_REFRESHED";
-let REMOTE_PEER_JOINED = "REMOTE_PEER_JOINED";
-let REMOTE_PEER_LEFT = "REMOTE_PEER_LEFT";
-let REMOTE_PEER_USER_DATA_RECEIVED = "REMOTE_PEER_USER_DATA_RECEIVED";
-
-let MEDIA_LOCAL_MEDIA_CAPTURED = "MEDIA_LOCAL_MEDIA_CAPTURED";
-let MEDIA_REMOTE_PEER_MEDIA_RECEIVED = "MEDIA_REMOTE_PEER_MEDIA_RECEIVED";
+let ROOM_CONNECTED = "ROOM_CONNECTED"
+let ROOM_DISCONNECTED = "ROOM_DISCONNECTED"
+let LOCAL_VIDEO_CAPTURED = "LOCAL_VIDEO_CAPTURED"
+let REMOTE_VIDEO_RECEIVED = "REMOTE_VIDEO_RECEIVED"
+let PEER_LEFT = "PEER_LEFT"
 
 @objc(SkylinkSDK) class SkylinkSDK : RCTEventEmitter {
+   private var connection: SkylinkConnection? = nil
+   
    override func supportedEvents() -> [String] {
       return [
-         LIFE_CYCLE_CONNECTED,
-         LIFE_CYCLE_DISCONNECTED,
-         LIFE_CYCLE_LOCK_ROOM_STATUS_CHANGED,
-         LIFE_CYCLE_LOG_RECEIVED,
-         LIFE_CYCLE_WARNING_RECEIVED,
-         REMOTE_PEER_DATA_CONNECTION_OPENED,
-         REMOTE_PEER_CONNECTION_REFRESHED,
-         REMOTE_PEER_JOINED,
-         REMOTE_PEER_LEFT,
-         REMOTE_PEER_USER_DATA_RECEIVED,
-         MEDIA_LOCAL_MEDIA_CAPTURED,
-         MEDIA_REMOTE_PEER_MEDIA_RECEIVED
-      ];
+         ROOM_CONNECTED,
+         ROOM_DISCONNECTED,
+         LOCAL_VIDEO_CAPTURED,
+         REMOTE_VIDEO_RECEIVED,
+         PEER_LEFT
+      ]
    }
    
    @objc override func constantsToExport() -> [AnyHashable : Any]! {
@@ -85,24 +71,11 @@ let MEDIA_REMOTE_PEER_MEDIA_RECEIVED = "MEDIA_REMOTE_PEER_MEDIA_RECEIVED";
             ]
          ],
          "events": [
-            "lifeCycle": [
-               LIFE_CYCLE_CONNECTED: LIFE_CYCLE_CONNECTED,
-               LIFE_CYCLE_DISCONNECTED: LIFE_CYCLE_DISCONNECTED,
-               LIFE_CYCLE_LOCK_ROOM_STATUS_CHANGED: LIFE_CYCLE_LOCK_ROOM_STATUS_CHANGED,
-               LIFE_CYCLE_LOG_RECEIVED: LIFE_CYCLE_LOG_RECEIVED,
-               LIFE_CYCLE_WARNING_RECEIVED: LIFE_CYCLE_WARNING_RECEIVED
-            ],
-            "remotePeer": [
-               REMOTE_PEER_DATA_CONNECTION_OPENED: REMOTE_PEER_DATA_CONNECTION_OPENED,
-               REMOTE_PEER_CONNECTION_REFRESHED: REMOTE_PEER_CONNECTION_REFRESHED,
-               REMOTE_PEER_JOINED: REMOTE_PEER_JOINED,
-               REMOTE_PEER_LEFT: REMOTE_PEER_LEFT,
-               REMOTE_PEER_USER_DATA_RECEIVED: REMOTE_PEER_USER_DATA_RECEIVED
-            ],
-            "media": [
-               MEDIA_LOCAL_MEDIA_CAPTURED: MEDIA_LOCAL_MEDIA_CAPTURED,
-               MEDIA_REMOTE_PEER_MEDIA_RECEIVED: MEDIA_REMOTE_PEER_MEDIA_RECEIVED
-            ]
+            ROOM_CONNECTED: ROOM_CONNECTED,
+            ROOM_DISCONNECTED: ROOM_DISCONNECTED,
+            LOCAL_VIDEO_CAPTURED: LOCAL_VIDEO_CAPTURED,
+            REMOTE_VIDEO_RECEIVED: REMOTE_VIDEO_RECEIVED,
+            PEER_LEFT: PEER_LEFT
          ]
       ]
    }
@@ -113,64 +86,64 @@ let MEDIA_REMOTE_PEER_MEDIA_RECEIVED = "MEDIA_REMOTE_PEER_MEDIA_RECEIVED";
       resolver: RCTPromiseResolveBlock,
       rejecter: RCTPromiseRejectBlock)
    {
-      var config = SKYLINKConnectionConfig();
+      var config = SKYLINKConnectionConfig()
       
       if let audioVideoSendConfig = config["audioVideoSendConfig"] as? String {
          config.sendAudio = audioVideoSendConfig == AUDIO_ONLY
-            || audioVideoSendConfig == AUDIO_AND_VIDEO;
+            || audioVideoSendConfig == AUDIO_AND_VIDEO
          
          config.sendVideo = audioVideoSendConfig == VIDEO_ONLY
-            || audioVideoSendConfig == AUDIO_AND_VIDEO;
+            || audioVideoSendConfig == AUDIO_AND_VIDEO
       }
       
       if let audioVideoReceiveConfig = config["audioVideoReceiveConfig"] as? String {
          config.receiveAudio = audioVideoReceiveConfig == AUDIO_ONLY
-            || audioVideoReceiveConfig == AUDIO_AND_VIDEO;
+            || audioVideoReceiveConfig == AUDIO_AND_VIDEO
          
          config.receiveVideo = audioVideoReceiveConfig == VIDEO_ONLY
-            || audioVideoReceiveConfig == AUDIO_AND_VIDEO;
+            || audioVideoReceiveConfig == AUDIO_AND_VIDEO
       }
       
       if let hasDataTransfer = config["hasDataTransfer"] as? Bool {
-         config.dataChannel = hasDataTransfer;
+         config.dataChannel = hasDataTransfer
       }
       
       if let hasFileTransfer = config["hasFileTransfer"] as? Bool {
-         config.fileTranser = hasFileTransfer;
+         config.fileTranser = hasFileTransfer
       }
       
       if let timeout = config["timeout"] as? Int {
-         config.timeout = timeout;
+         config.timeout = timeout
       }
       
       if let maxAudioBitrate = config["maxAudioBitrate"] as? Int {
-         config.maxAudioBitrate = maxAudioBitrate;
+         config.maxAudioBitrate = maxAudioBitrate
       }
       
       if let maxVideoBitrate = config["maxVideoBitrate"] as? Int {
-         config.maxVideoBitrate = maxVideoBitrate;
+         config.maxVideoBitrate = maxVideoBitrate
       }
       
       if let maxDataBitrate = config["maxDataBitrate"] as? Int {
-         config.maxDataBitrate = maxDataBitrate;
+         config.maxDataBitrate = maxDataBitrate
       }
       
       if let defaultVideoDevice = config["defaultVideoDevice"] as? String {
          config.advancedSetting(key: "startWithBackCamera",
-            setValue: defaultVideoDevice == CAMERA_BACK);
+            setValue: defaultVideoDevice == CAMERA_BACK)
       }
       
-      var connection = SkylinkConnection(withConfig: config, appKey: appKey);
+      connection = SkylinkConnection(withConfig: config, appKey: appKey)
       
-      connection.lifeCycleDelegate = self;
-      connection.remotePeerDelegate = self;
-      connection.mediaDelegate = self;
+      connection.lifeCycleDelegate = self
+      connection.remotePeerDelegate = self
+      connection.mediaDelegate = self
       
       if let maxPeers = config["maxPeers"] as? Int {
-         connection.maxPeerCount = maxPeers;
+         connection.maxPeerCount = maxPeers
       }
       
-      resolver(nil);
+      resolver(nil)
    }
    
    @objc func getCaptureFormats(
@@ -178,6 +151,40 @@ let MEDIA_REMOTE_PEER_MEDIA_RECEIVED = "MEDIA_REMOTE_PEER_MEDIA_RECEIVED";
       resolver: RCTPromiseResolveBlock,
       rejecter: RCTPromiseRejectBlock)
    {
-      resolver([String: Any]());
+      resolver([String: Any]())
+   }
+   
+   @objc func connectToRoom(
+      _ params: [String: Any],
+      resolver: RCTPromiseResolveBlock,
+      rejecter: RCTPromiseRejectBlock)
+   {
+      let userInfo = params["userData"]
+      
+      var result: Bool?
+      
+      if let connectionString = params["connectionString"] as? String {
+         result = connection.connectToRoom(withStringURL: connectionString, userInfo: userInfo)
+      } else if
+         let secret = params["secret"] as? String,
+         let roomName = params["roomName"] as? String
+      {
+         result = connection.connectToRoom(withSecret: secret, roomName: roomName, userInfo: userInfo)
+      }
+      
+      result == nil ? rejecter("", "Either 'connectionString' or 'secret / roomName' must be specified") : resolver(result)
+   }
+   
+   @objc func switchCamera() {
+      connection.switchCamera();
+   }
+   
+   @objc func disconnectFromRoom(
+      _ resolver: RCTPromiseResolveBlock,
+      rejecter: RCTPromiseRejectBlock)
+   {
+      connection.disconnect();
+      
+      resolver(true);
    }
 }
