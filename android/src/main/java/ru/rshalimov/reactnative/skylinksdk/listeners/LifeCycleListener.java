@@ -3,27 +3,21 @@ package ru.rshalimov.reactnative.skylinksdk.listeners;
 import com.facebook.react.bridge.Arguments;
 import com.facebook.react.bridge.WritableMap;
 
+import sg.com.temasys.skylink.sdk.adapter.LifeCycleAdapter;
+
 import ru.rshalimov.reactnative.skylinksdk.Module;
 
 import android.util.Log;
 
-public class LifeCycleListener implements sg.com.
-   temasys.skylink.sdk.listener.LifeCycleListener
-{
-   public static final String LIFE_CYCLE_CONNECTED;
-   public static final String LIFE_CYCLE_DISCONNECTED;
-   public static final String LIFE_CYCLE_LOCK_ROOM_STATUS_CHANGED;
-   public static final String LIFE_CYCLE_LOG_RECEIVED;
-   public static final String LIFE_CYCLE_WARNING_RECEIVED;
+public class LifeCycleListener extends LifeCycleAdapter {
+   public static final String ROOM_CONNECTED;
+   public static final String ROOM_DISCONNECTED;
    
    private static final String TAG = "LifeCycleListener";
    
    static {
-      LIFE_CYCLE_CONNECTED = "LIFE_CYCLE_CONNECTED";
-      LIFE_CYCLE_DISCONNECTED = "LIFE_CYCLE_DISCONNECTED";
-      LIFE_CYCLE_LOCK_ROOM_STATUS_CHANGED = "LIFE_CYCLE_LOCK_ROOM_STATUS_CHANGED";
-      LIFE_CYCLE_LOG_RECEIVED = "LIFE_CYCLE_LOG_RECEIVED";
-      LIFE_CYCLE_WARNING_RECEIVED = "LIFE_CYCLE_WARNING_RECEIVED";
+      ROOM_CONNECTED = "ROOM_CONNECTED";
+      ROOM_DISCONNECTED = "ROOM_DISCONNECTED";
    }
    
    @Override
@@ -35,7 +29,7 @@ public class LifeCycleListener implements sg.com.
       params.putBoolean("isSuccessful", isSuccessful);
       params.putString("message", message);
       
-      Module.getInstance().emit(LIFE_CYCLE_CONNECTED, params);
+      Module.getInstance().emit(ROOM_CONNECTED, params);
    }
    
    @Override
@@ -47,43 +41,6 @@ public class LifeCycleListener implements sg.com.
       params.putInt("errorCode", errorCode);
       params.putString("message", message);
       
-      Module.getInstance().emit(LIFE_CYCLE_DISCONNECTED, params);
-   }
-   
-   @Override
-   public void onLockRoomStatusChange(String remotePeerId, boolean lockStatus) {
-      Log.d(TAG, String.format("onLockRoomStatusChange() %s %s",
-         remotePeerId, lockStatus));
-      
-      final WritableMap params = Arguments.createMap();
-      
-      params.putString("remotePeerId", remotePeerId);
-      params.putBoolean("lockStatus", lockStatus);
-      
-      Module.getInstance().emit(LIFE_CYCLE_LOCK_ROOM_STATUS_CHANGED, params);
-   }
-   
-   @Override
-   public void onReceiveLog(int infoCode, String message) {
-      Log.d(TAG, String.format("onReceiveLog() %d %s", infoCode, message));
-      
-      final WritableMap params = Arguments.createMap();
-      
-      params.putInt("infoCode", infoCode);
-      params.putString("message", message);
-      
-      Module.getInstance().emit(LIFE_CYCLE_LOG_RECEIVED, params);
-   }
-   
-   @Override
-   public void onWarning(int errorCode, String message) {
-      Log.d(TAG, String.format("onWarning() %d %s", errorCode, message));
-      
-      final WritableMap params = Arguments.createMap();
-      
-      params.putInt("errorCode", errorCode);
-      params.putString("message", message);
-      
-      Module.getInstance().emit(LIFE_CYCLE_WARNING_RECEIVED, params);
+      Module.getInstance().emit(ROOM_DISCONNECTED, params);
    }
 }

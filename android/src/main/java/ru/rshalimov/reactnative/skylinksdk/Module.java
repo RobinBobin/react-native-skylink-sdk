@@ -84,23 +84,11 @@ public class Module extends BaseModule {
             .pop()
          .pop()
          .push("events")
-            .push("lifeCycle")
-               .put(LifeCycleListener.LIFE_CYCLE_CONNECTED)
-               .put(LifeCycleListener.LIFE_CYCLE_DISCONNECTED)
-               .put(LifeCycleListener.LIFE_CYCLE_LOCK_ROOM_STATUS_CHANGED)
-               .put(LifeCycleListener.LIFE_CYCLE_LOG_RECEIVED)
-               .put(LifeCycleListener.LIFE_CYCLE_WARNING_RECEIVED)
-            .pop()
-            .push("remotePeer")
-               .put(RemotePeerListener.REMOTE_PEER_DATA_CONNECTION_OPENED)
-               .put(RemotePeerListener.REMOTE_PEER_CONNECTION_REFRESHED)
-               .put(RemotePeerListener.REMOTE_PEER_JOINED)
-               .put(RemotePeerListener.REMOTE_PEER_LEFT)
-               .put(RemotePeerListener.REMOTE_PEER_USER_DATA_RECEIVED)
-            .pop()
-            .push("media")
-               .put(MediaListener.MEDIA_LOCAL_MEDIA_CAPTURED)
-               .put(MediaListener.MEDIA_REMOTE_PEER_MEDIA_RECEIVED)
+            .put(LifeCycleListener.ROOM_CONNECTED)
+            .put(LifeCycleListener.ROOM_DISCONNECTED)
+            .put(MediaListener.LOCAL_VIDEO_CAPTURED)
+            .put(MediaListener.REMOTE_VIDEO_RECEIVED)
+            .put(RemotePeerListener.PEER_LEFT)
          .build();
    }
    
@@ -117,10 +105,7 @@ public class Module extends BaseModule {
          cfg.set("audioHighPassFilter", Boolean.class);
          cfg.set("audioNoiseSuppression", Boolean.class);
          cfg.set("audioStereo", Boolean.class);
-         
-         cfg.setEnum("audioVideoReceiveConfig",
-            SkylinkConfig.AudioVideoConfig.class);
-         
+         cfg.setEnum("audioVideoReceiveConfig", SkylinkConfig.AudioVideoConfig.class);
          cfg.setEnum("audioVideoSendConfig", SkylinkConfig.AudioVideoConfig.class);
          cfg.setEnum("defaultVideoDevice", SkylinkConfig.VideoDevice.class);
          cfg.set("enableLogs", Boolean.class);
@@ -139,8 +124,7 @@ public class Module extends BaseModule {
          
          final SkylinkConnection connection = SkylinkConnection.getInstance();
          
-         connection.init(appKey, cfg.getObject(),
-            getCurrentActivity().getApplicationContext());
+         connection.init(appKey, cfg.getObject(), getCurrentActivity().getApplicationContext());
          
          connection.setLifeCycleListener(lifeCycleListener);
          connection.setRemotePeerListener(remotePeerListener);
@@ -156,8 +140,7 @@ public class Module extends BaseModule {
    public void getCaptureFormats(String videoDevice, Promise promise) {
       final WritableArray formats = Arguments.createArray();
       
-      for (SkylinkCaptureFormat format : SkylinkConnection.getInstance().
-         getCaptureFormats(SkylinkConfig.VideoDevice.valueOf(videoDevice)))
+      for (SkylinkCaptureFormat format : SkylinkConnection.getInstance().getCaptureFormats(SkylinkConfig.VideoDevice.valueOf(videoDevice)))
       {
          final WritableMap f = Arguments.createMap();
          
@@ -173,35 +156,13 @@ public class Module extends BaseModule {
    }
    
    @ReactMethod
-   public void getVideoView(String peerId, Promise promise) {
-      final String common = String.format(" the video view for peer '%s'.", peerId);
-      
-      final SurfaceViewRenderer instance = SkylinkConnection.
-         getInstance().getVideoView(peerId);
-      
-      final String reason = instance == null ? String.format("Can't get%s", common)
-         : instance.getParent() != null ? String.format(
-            "Looks like you've already requested%s", common)
-         : null;
-      
-      if (reason != null) {
-         promise.reject("", reason);
-      } else {
-         SurfaceViewRendererManager.setInstance(instance);
-         
-         promise.resolve(null);
-      }
-   }
-   
-   @ReactMethod
    public void connectToRoom(ReadableMap params, Promise promise) {
       final Map <String, Object> map = params.toHashMap();
       
       final boolean secure = map.containsKey("connectionString");
       final Object usrDt = map.get("userData");
       
-      final Object userData = usrDt instanceof List ? new JSONArray((List <?>)
-         usrDt) : usrDt instanceof Map ? new JSONObject((Map <?, ?>)usrDt) : usrDt;
+      final Object userData = usrDt instanceof List ? new JSONArray((List <?>)usrDt) : usrDt instanceof Map ? new JSONObject((Map <?, ?>)usrDt) : usrDt;
       
       final StringBuilder sb = new StringBuilder("connectToRoom() ");
       
@@ -223,19 +184,34 @@ public class Module extends BaseModule {
       
       final SkylinkConnection connection = SkylinkConnection.getInstance();
       
-      promise.resolve(secure ? connection.connectToRoom(map.get("connectionString").
-         toString(), userData) : connection.connectToRoom(map.get("secret").
-            toString(), map.get("roomName").toString(), userData));
+      promise.resolve(secure ? connection.connectToRoom(map.get("connectionString").toString(), userData) : connection.connectToRoom(map.get("secret").toString(), map.get("roomName").toString(), userData));
    }
    
    @ReactMethod
-   public void disconnectFromRoom(Promise promise) {
-      promise.resolve(SkylinkConnection.getInstance().disconnectFromRoom());
+   public void prepareVideoView(String peerId, Promise promise) {
+      final String common = String.format(" the video view for peer '%s'.", peerId);
+
+      final SurfaceViewRenderer instance = SkylinkConnection.getInstance().getVideoView(peerId);
+
+      final String errorMessage = instance == null ? String.format("Can't prepare%s", common) : instance.getParent() != null ? String.format("Looks like you've already prepared%s", common) : null;
+
+      if (errorMessage != null) {
+         promise.reject("", errorMessage);
+      } else {
+         SurfaceViewRendererManager.setInstance(instance);
+
+         promise.resolve(null);
+      }
    }
    
    @ReactMethod
    public void switchCamera() {
       SkylinkConnection.getInstance().switchCamera();
+   }
+   
+   @ReactMethod
+   public void disconnectFromRoom(Promise promise) {
+      promise.resolve(SkylinkConnection.getInstance().disconnectFromRoom());
    }
    
    public static Module getInstance() {

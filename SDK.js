@@ -27,10 +27,6 @@ export default class SDK {
       return sdk.getCaptureFormats(videoDevice);
    }
    
-   static async getVideoView(peerId) {
-      await sdk.getVideoView(peerId);
-   }
-   
    /*
       params = {
          secret: String,
@@ -43,16 +39,20 @@ export default class SDK {
       return sdk.connectToRoom(params);
    }
    
-   static disconnectFromRoom() {
-      return sdk.disconnectFromRoom();
+   static async prepareVideoView(peerId) {
+      await sdk.prepareVideoView(peerId);
    }
    
    static switchCamera() {
       sdk.switchCamera();
    }
+   
+   static disconnectFromRoom() {
+      return sdk.disconnectFromRoom();
+   }
 }
 
-const eventHandlingHelper = new EventHandlingHelper({
+new EventHandlingHelper({
    object: SDK,
    nativeModule: sdk,
    exportRemove: true
