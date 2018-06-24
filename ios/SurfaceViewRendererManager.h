@@ -2,5 +2,5 @@
 #import <React/RCTViewManager.h>
 
 @interface RCTSurfaceViewRendererManager : RCTViewManager
-   + (void)setVideoView:(UIView *);
+   + (void)setVideoView:(UIView *)videoView;
 @end

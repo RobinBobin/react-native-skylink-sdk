@@ -3,4 +3,6 @@
 //
 
 #import <React/RCTEventEmitter.h>
+#import <SKYLINK/SKYLINK.h>
+
 #import "SurfaceViewRendererManager.h"

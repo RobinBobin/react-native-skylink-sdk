@@ -7,7 +7,6 @@
 //
 
 import Foundation
-import UIKit
 
 let AUDIO_AND_VIDEO = "AUDIO_AND_VIDEO"
 let AUDIO_ONLY = "AUDIO_ONLY"
@@ -31,7 +30,7 @@ let PEER_LEFT = "PEER_LEFT"
    SKYLINKConnectionLifeCycleDelegate,
    SKYLINKConnectionRemotePeerDelegate
 {
-   private var connection: SkylinkConnection?
+   private var connection: SKYLINKConnection?
    private var videoViews = [String: UIView]()
    
    override func supportedEvents() -> [String] {
@@ -141,60 +140,60 @@ let PEER_LEFT = "PEER_LEFT"
       resolver: RCTPromiseResolveBlock,
       rejecter: RCTPromiseRejectBlock)
    {
-      var config = SKYLINKConnectionConfig()
+      let cconfig = SKYLINKConnectionConfig()
       
       if let audioVideoSendConfig = config["audioVideoSendConfig"] as? String {
-         config.sendAudio = audioVideoSendConfig == AUDIO_ONLY
+         cconfig.sendAudio = audioVideoSendConfig == AUDIO_ONLY
             || audioVideoSendConfig == AUDIO_AND_VIDEO
          
-         config.sendVideo = audioVideoSendConfig == VIDEO_ONLY
+         cconfig.sendVideo = audioVideoSendConfig == VIDEO_ONLY
             || audioVideoSendConfig == AUDIO_AND_VIDEO
       }
       
       if let audioVideoReceiveConfig = config["audioVideoReceiveConfig"] as? String {
-         config.receiveAudio = audioVideoReceiveConfig == AUDIO_ONLY
+         cconfig.receiveAudio = audioVideoReceiveConfig == AUDIO_ONLY
             || audioVideoReceiveConfig == AUDIO_AND_VIDEO
          
-         config.receiveVideo = audioVideoReceiveConfig == VIDEO_ONLY
+         cconfig.receiveVideo = audioVideoReceiveConfig == VIDEO_ONLY
             || audioVideoReceiveConfig == AUDIO_AND_VIDEO
       }
       
       if let hasDataTransfer = config["hasDataTransfer"] as? Bool {
-         config.dataChannel = hasDataTransfer
+         cconfig.dataChannel = hasDataTransfer
       }
       
       if let hasFileTransfer = config["hasFileTransfer"] as? Bool {
-         config.fileTranser = hasFileTransfer
+         cconfig.fileTransfer = hasFileTransfer
       }
       
       if let timeout = config["timeout"] as? Int {
-         config.timeout = timeout
+         cconfig.timeout = timeout
       }
       
       if let maxAudioBitrate = config["maxAudioBitrate"] as? Int {
-         config.maxAudioBitrate = maxAudioBitrate
+         cconfig.maxAudioBitrate = maxAudioBitrate
       }
       
       if let maxVideoBitrate = config["maxVideoBitrate"] as? Int {
-         config.maxVideoBitrate = maxVideoBitrate
+         cconfig.maxVideoBitrate = maxVideoBitrate
       }
       
       if let maxDataBitrate = config["maxDataBitrate"] as? Int {
-         config.maxDataBitrate = maxDataBitrate
+         cconfig.maxDataBitrate = maxDataBitrate
       }
       
       if let defaultVideoDevice = config["defaultVideoDevice"] as? String {
-         config.advancedSetting(key: "startWithBackCamera",
+         cconfig.advancedSettingKey("startWithBackCamera",
             setValue: defaultVideoDevice == CAMERA_BACK)
       }
       
-      connection = SkylinkConnection(withConfig: config, appKey: appKey)
+      connection = SKYLINKConnection(config: cconfig, appKey: appKey)
       
-      connection.lifeCycleDelegate = self
-      connection.remotePeerDelegate = self
+      connection!.lifeCycleDelegate = self
+      connection!.remotePeerDelegate = self
       
       if let maxPeers = config["maxPeers"] as? Int {
-         connection.maxPeerCount = maxPeers
+         connection!.maxPeerCount = maxPeers
       }
       
       resolver(nil)
@@ -218,15 +217,15 @@ let PEER_LEFT = "PEER_LEFT"
       var result: Bool?
       
       if let connectionString = params["connectionString"] as? String {
-         result = connection.connectToRoom(withStringURL: connectionString, userInfo: userInfo)
+         result = connection!.connectToRoom(withStringURL: connectionString, userInfo: userInfo)
       } else if
          let secret = params["secret"] as? String,
          let roomName = params["roomName"] as? String
       {
-         result = connection.connectToRoom(withSecret: secret, roomName: roomName, userInfo: userInfo)
+         result = connection!.connectToRoom(withSecret: secret, roomName: roomName, userInfo: userInfo)
       }
       
-      result == nil ? rejecter("", "Either 'connectionString' or 'secret / roomName' must be specified.") : resolver(result)
+      result == nil ? rejecter("", "Either 'connectionString' or 'secret / roomName' must be specified.", nil) : resolver(result)
    }
    
    @objc func prepareVideoView(
@@ -238,7 +237,7 @@ let PEER_LEFT = "PEER_LEFT"
       let videoView = videoViews[peerId ?? ""]
       
       if videoView == nil {
-         rejecter("", "Can't prepare\(common)")
+         rejecter("", "Can't prepare\(common)", nil)
       } else {
          RCTSurfaceViewRendererManager.setVideoView(videoView);
          
@@ -247,14 +246,14 @@ let PEER_LEFT = "PEER_LEFT"
    }
    
    @objc func switchCamera() {
-      connection.switchCamera()
+      connection!.switchCamera()
    }
    
    @objc func disconnectFromRoom(
       _ resolver: RCTPromiseResolveBlock,
       rejecter: RCTPromiseRejectBlock)
    {
-      connection.disconnect()
+      connection!.disconnect(nil)
       
       resolver(true)
    }

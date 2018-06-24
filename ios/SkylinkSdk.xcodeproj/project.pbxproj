@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		895CBC7F20DFF8D20010BFDC /* SurfaceViewRendererManager.m in Sources */ = {isa = PBXBuildFile; fileRef = 895CBC7D20DFF8D20010BFDC /* SurfaceViewRendererManager.m */; };
 		89E2645B20C87E9400504D68 /* SkylinkSDK.swift in Sources */ = {isa = PBXBuildFile; fileRef = 89E2645A20C87E9400504D68 /* SkylinkSDK.swift */; };
 		B3E7B58A1CC2AC0600A0062D /* SkylinkSdk.m in Sources */ = {isa = PBXBuildFile; fileRef = B3E7B5891CC2AC0600A0062D /* SkylinkSdk.m */; };
 /* End PBXBuildFile section */
@@ -25,6 +26,8 @@
 
 /* Begin PBXFileReference section */
 		134814201AA4EA6300B7C361 /* libSkylinkSdk.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = libSkylinkSdk.a; sourceTree = BUILT_PRODUCTS_DIR; };
+		895CBC7D20DFF8D20010BFDC /* SurfaceViewRendererManager.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SurfaceViewRendererManager.m; sourceTree = "<group>"; };
+		895CBC7E20DFF8D20010BFDC /* SurfaceViewRendererManager.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SurfaceViewRendererManager.h; sourceTree = "<group>"; };
 		89E2645920C87E9300504D68 /* SkylinkSdk-Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "SkylinkSdk-Bridging-Header.h"; sourceTree = "<group>"; };
 		89E2645A20C87E9400504D68 /* SkylinkSDK.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SkylinkSDK.swift; sourceTree = "<group>"; };
 		B3E7B5891CC2AC0600A0062D /* SkylinkSdk.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SkylinkSdk.m; sourceTree = "<group>"; };
@@ -52,6 +55,8 @@
 		58B511D21A9E6C8500147676 = {
 			isa = PBXGroup;
 			children = (
+				895CBC7E20DFF8D20010BFDC /* SurfaceViewRendererManager.h */,
+				895CBC7D20DFF8D20010BFDC /* SurfaceViewRendererManager.m */,
 				89E2645920C87E9300504D68 /* SkylinkSdk-Bridging-Header.h */,
 				89E2645A20C87E9400504D68 /* SkylinkSDK.swift */,
 				B3E7B5891CC2AC0600A0062D /* SkylinkSdk.m */,
@@ -116,6 +121,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				895CBC7F20DFF8D20010BFDC /* SurfaceViewRendererManager.m in Sources */,
 				89E2645B20C87E9400504D68 /* SkylinkSDK.swift in Sources */,
 				B3E7B58A1CC2AC0600A0062D /* SkylinkSdk.m in Sources */,
 			);
@@ -225,6 +231,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				CLANG_ENABLE_MODULES = YES;
+				FRAMEWORK_SEARCH_PATHS = ../../../ios/Pods/SKYLINK;
 				HEADER_SEARCH_PATHS = (
 					"$(inherited)",
 					/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/include,
@@ -247,6 +254,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				CLANG_ENABLE_MODULES = YES;
+				FRAMEWORK_SEARCH_PATHS = ../../../ios/Pods/SKYLINK;
 				HEADER_SEARCH_PATHS = (
 					"$(inherited)",
 					/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/include,

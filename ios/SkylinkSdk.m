@@ -24,13 +24,13 @@ RCT_EXTERN_METHOD(
 
 RCT_EXTERN_METHOD(
    connectToRoom:
-   (NSDictionary *)params,
+   (NSDictionary *)params
    resolver: (RCTPromiseResolveBlock)resolver
    rejecter: (RCTPromiseRejectBlock)rejecter)
 
 RCT_EXTERN_METHOD(
    prepareVideoView:
-   (NSString *)peerId,
+   (NSString *)peerId
    resolver: (RCTPromiseResolveBlock)resolver
    rejecter: (RCTPromiseRejectBlock)rejecter)
 
@@ -38,7 +38,7 @@ RCT_EXTERN_METHOD(switchCamera:)
 
 RCT_EXTERN_METHOD(
    disconnectFromRoom:
-   (RCTPromiseResolveBlock)resolver,
+   (RCTPromiseResolveBlock)resolver
    rejecter: (RCTPromiseRejectBlock)rejecter)
 
 @end
