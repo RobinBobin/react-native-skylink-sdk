@@ -33,6 +33,10 @@ let PEER_LEFT = "PEER_LEFT"
    private var connection: SKYLINKConnection?
    private var videoViews = [String: UIView]()
    
+   override static func requiresMainQueueSetup() -> Bool {
+      return true
+   }
+   
    override func supportedEvents() -> [String] {
       return [
          ROOM_CONNECTED,
@@ -85,11 +89,7 @@ let PEER_LEFT = "PEER_LEFT"
       ]
    }
    
-   func connection(
-      _ connection: SKYLINKConnection,
-      didConnectWithMessage: String,
-      success: Bool)
-   {
+   func connection(_ connection: SKYLINKConnection, didConnectWithMessage: String, success: Bool) {
       emit(ROOM_CONNECTED, [
          "isSuccessful": success,
          "message": didConnectWithMessage
@@ -102,30 +102,23 @@ let PEER_LEFT = "PEER_LEFT"
       emit(LOCAL_VIDEO_CAPTURED)
    }
    
-   func connection(
-      _ connection: SKYLINKConnection,
-      didDisconnectWithMessage: String)
-   {
-      videoViews.removeAll()
-      
-      emit(ROOM_DISCONNECTED, ["message": didDisconnectWithMessage])
+   func connection(_ connection: SKYLINKConnection, didDisconnectWithMessage: String) {
+      emit(ROOM_DISCONNECTED, [
+         "message": didDisconnectWithMessage,
+         "errorCode": -1])
    }
    
-   func connection(
-      _ connection: SKYLINKConnection,
-      didRenderPeerVideo: UIView,
-      peerId: String)
-   {
+   func connection(_ connection: SKYLINKConnection, didJoinPeer: Any, mediaProperties: SKYLINKPeerMediaProperties, peerId: String) {
+      // didRenderPeerVideo somehow doesn't get called without this func.
+   }
+   
+   func connection(_ connection: SKYLINKConnection, didRenderPeerVideo: UIView, peerId: String) {
       videoViews[peerId] = didRenderPeerVideo
       
       emit(REMOTE_VIDEO_RECEIVED, ["remotePeerId": peerId])
    }
    
-   func connection(
-      _ connection: SKYLINKConnection,
-      didLeavePeerWithMessage: String,
-      peerId: String)
-   {
+   func connection(_ connection: SKYLINKConnection, didLeavePeerWithMessage: String, peerId: String) {
       videoViews[peerId] = nil
       
       emit(PEER_LEFT, [
@@ -134,12 +127,7 @@ let PEER_LEFT = "PEER_LEFT"
       ])
    }
    
-   @objc func initSDK(
-      _ appKey: String,
-      config: [String: Any],
-      resolver: RCTPromiseResolveBlock,
-      rejecter: RCTPromiseRejectBlock)
-   {
+   @objc func initSDK(_ appKey: String, config: [String: Any], resolver: RCTPromiseResolveBlock, rejecter: RCTPromiseRejectBlock) {
       let cconfig = SKYLINKConnectionConfig()
       
       if let audioVideoSendConfig = config["audioVideoSendConfig"] as? String {
@@ -187,6 +175,10 @@ let PEER_LEFT = "PEER_LEFT"
             setValue: defaultVideoDevice == CAMERA_BACK)
       }
       
+      if let enableLogs = config["enableLogs"] as? Bool {
+         SKYLINKConnection.setVerbose(enableLogs)
+      }
+      
       connection = SKYLINKConnection(config: cconfig, appKey: appKey)
       
       connection!.lifeCycleDelegate = self
@@ -199,63 +191,58 @@ let PEER_LEFT = "PEER_LEFT"
       resolver(nil)
    }
    
-   @objc func getCaptureFormats(
-      _ videoDevice: String,
-      resolver: RCTPromiseResolveBlock,
-      rejecter: RCTPromiseRejectBlock)
-   {
+   @objc func getCaptureFormats(_ videoDevice: String, resolver: RCTPromiseResolveBlock, rejecter: RCTPromiseRejectBlock) {
       resolver([String: Any]())
    }
    
-   @objc func connectToRoom(
-      _ params: [String: Any],
-      resolver: RCTPromiseResolveBlock,
-      rejecter: RCTPromiseRejectBlock)
-   {
-      let userInfo = params["userData"]
-      
-      var result: Bool?
-      
-      if let connectionString = params["connectionString"] as? String {
-         result = connection!.connectToRoom(withStringURL: connectionString, userInfo: userInfo)
-      } else if
-         let secret = params["secret"] as? String,
-         let roomName = params["roomName"] as? String
-      {
-         result = connection!.connectToRoom(withSecret: secret, roomName: roomName, userInfo: userInfo)
+   @objc func connectToRoom(_ params: [String: Any], resolver: RCTPromiseResolveBlock, rejecter: RCTPromiseRejectBlock) {
+      if (isInitialized(rejecter)) {
+         let userInfo = params["userData"]
+         
+         var result: Bool?
+         
+         if let connectionString = params["connectionString"] as? String {
+            result = connection!.connectToRoom(withStringURL: connectionString, userInfo: userInfo)
+         } else if
+            let secret = params["secret"] as? String,
+            let roomName = params["roomName"] as? String
+         {
+            result = connection!.connectToRoom(withSecret: secret, roomName: roomName, userInfo: userInfo)
+         }
+         
+         result == nil ? rejecter("", "Either 'connectionString' or 'secret / roomName' must be specified.", nil) : resolver(result)
       }
-      
-      result == nil ? rejecter("", "Either 'connectionString' or 'secret / roomName' must be specified.", nil) : resolver(result)
    }
    
-   @objc func prepareVideoView(
-      _ peerId: String,
-      resolver: RCTPromiseResolveBlock,
-      rejecter: RCTPromiseRejectBlock)
-   {
+   @objc func prepareVideoView(_ peerId: String, resolver: RCTPromiseResolveBlock, rejecter: RCTPromiseRejectBlock) {
       let common = " the video view for peer '\(peerId)'."
-      let videoView = videoViews[peerId ?? ""]
+      let videoView = videoViews[peerId]
       
       if videoView == nil {
          rejecter("", "Can't prepare\(common)", nil)
       } else {
-         RCTSurfaceViewRendererManager.setVideoView(videoView);
+         RCTSurfaceViewRendererManager.setVideoView(videoView)
          
          resolver(nil)
       }
    }
    
    @objc func switchCamera() {
-      connection!.switchCamera()
+      connection?.switchCamera()
    }
    
-   @objc func disconnectFromRoom(
-      _ resolver: RCTPromiseResolveBlock,
-      rejecter: RCTPromiseRejectBlock)
-   {
-      connection!.disconnect(nil)
-      
-      resolver(true)
+   @objc func disconnectFromRoom(_ resolver: RCTPromiseResolveBlock, rejecter: RCTPromiseRejectBlock) {
+      if (isInitialized(rejecter)) {
+         videoViews.removeAll()
+         
+         connection!.disconnect {
+            self.emit(ROOM_DISCONNECTED, [
+               "message": "User disconnected from the room",
+               "errorCode": 15])
+         }
+         
+         resolver(true)
+      }
    }
    
    func emit(_ eventName: String, _ params: [String: Any]? = nil) {
@@ -264,5 +251,15 @@ let PEER_LEFT = "PEER_LEFT"
       params?.forEach { param in body[param.key] = param.value }
       
       sendEvent(withName: eventName, body: body)
+   }
+   
+   func isInitialized(_ rejecter: RCTPromiseRejectBlock) -> Bool {
+      if connection != nil {
+         return true
+      }
+      
+      rejecter("", "init() hasn't been called yet.", nil)
+      
+      return false
    }
 }

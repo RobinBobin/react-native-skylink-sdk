@@ -34,7 +34,7 @@ RCT_EXTERN_METHOD(
    resolver: (RCTPromiseResolveBlock)resolver
    rejecter: (RCTPromiseRejectBlock)rejecter)
 
-RCT_EXTERN_METHOD(switchCamera:)
+RCT_EXTERN_METHOD(switchCamera)
 
 RCT_EXTERN_METHOD(
    disconnectFromRoom:

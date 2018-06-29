@@ -10,8 +10,8 @@ RCT_EXPORT_MODULE()
    return videoView;
 }
 
-+ (void)setVideoView:(UIView *)videoView {
-   self.videoView = videoView;
++ (void)setVideoView:(UIView *)vv {
+   videoView = vv;
 }
 
 @end
