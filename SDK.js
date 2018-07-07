@@ -47,6 +47,14 @@ export default class SDK {
       sdk.switchCamera();
    }
    
+   static startRecording() {
+      return sdk.startRecording();
+   }
+   
+   static stopRecording() {
+      return sdk.stopRecording();
+   }
+   
    static disconnectFromRoom() {
       return sdk.disconnectFromRoom();
    }

@@ -29,6 +29,7 @@ import ru.rshalimov.reactnative.common.ObjectPropertySetter;
 import ru.rshalimov.reactnative.skylinksdk.listeners.LifeCycleListener;
 import ru.rshalimov.reactnative.skylinksdk.listeners.RemotePeerListener;
 import ru.rshalimov.reactnative.skylinksdk.listeners.MediaListener;
+import ru.rshalimov.reactnative.skylinksdk.listeners.RecordingListener;
 
 public class Module extends BaseModule {
    public static final String TAG = "SkylinkSDK";
@@ -38,6 +39,7 @@ public class Module extends BaseModule {
    private final LifeCycleListener lifeCycleListener = new LifeCycleListener();
    private final RemotePeerListener remotePeerListener = new RemotePeerListener();
    private final MediaListener mediaListener = new MediaListener();
+   private final RecordingListener recordingListener = new RecordingListener();
    
    Module(ReactApplicationContext reactContext) {
       super(reactContext);
@@ -129,6 +131,7 @@ public class Module extends BaseModule {
          connection.setLifeCycleListener(lifeCycleListener);
          connection.setRemotePeerListener(remotePeerListener);
          connection.setMediaListener(mediaListener);
+         connection.setRecordingListener(recordingListener);
          
          promise.resolve(null);
       } catch (Exception e) {
@@ -207,6 +210,16 @@ public class Module extends BaseModule {
    @ReactMethod
    public void switchCamera() {
       SkylinkConnection.getInstance().switchCamera();
+   }
+   
+   @ReactMethod
+   public void startRecording(Promise promise) {
+      promise.resolve(SkylinkConnection.getInstance().startRecording());
+   }
+   
+   @ReactMethod
+   public void stopRecording(Promise promise) {
+      promise.resolve(SkylinkConnection.getInstance().stopRecording());
    }
    
    @ReactMethod
