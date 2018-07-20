@@ -5,6 +5,7 @@ const sdk = NativeModules.SkylinkSDK;
 
 export default class SDK {
    static skylinkConfig = sdk.skylinkConfig;
+   static skylinkState = sdk.skylinkState;
    
    static async init(appKey, config) {
       [
@@ -25,6 +26,14 @@ export default class SDK {
    
    static getCaptureFormats(videoDevice) {
       return sdk.getCaptureFormats(videoDevice);
+   }
+   
+   static getSkylinkState() {
+      return sdk.getSkylinkState();
+   }
+   
+   static async isConnected() {
+      return (await SDK.getSkylinkState()) == SDK.skylinkState.CONNECTED;
    }
    
    /*

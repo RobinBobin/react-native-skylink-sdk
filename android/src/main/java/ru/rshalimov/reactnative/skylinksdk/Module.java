@@ -16,6 +16,7 @@ import android.util.Log;
 import sg.com.temasys.skylink.sdk.rtc.SkylinkCaptureFormat;
 import sg.com.temasys.skylink.sdk.rtc.SkylinkConfig;
 import sg.com.temasys.skylink.sdk.rtc.SkylinkConnection;
+import sg.com.temasys.skylink.sdk.rtc.SkylinkConnection.SkylinkState;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -84,6 +85,12 @@ public class Module extends BaseModule {
                .put("ISAC")
                .put("OPUS")
             .pop()
+         .pop()
+         .push("skylinkState")
+            .put("CONNECTED")
+            .put("CONNECTING")
+            .put("DISCONNECTED")
+            .put("DISCONNECTING")
          .pop()
          .push("events")
             .put(LifeCycleListener.ROOM_CONNECTED)
@@ -156,6 +163,17 @@ public class Module extends BaseModule {
       }
       
       promise.resolve(formats);
+   }
+   
+   @ReactMethod
+   public void getSkylinkState(Promise promise) {
+      final SkylinkState state = SkylinkConnection.getInstance().getSkylinkState();
+      
+      if (state == null) {
+         promise.reject("", "There was error getting SkylinkState");
+      } else {
+         promise.resolve(state.toString());
+      }
    }
    
    @ReactMethod
