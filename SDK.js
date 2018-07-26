@@ -44,8 +44,8 @@ export default class SDK {
          userData: String | [] | {}
       }
    */
-   static connectToRoom(params) {
-      return sdk.connectToRoom(params);
+   static async connectToRoom(params) {
+      await sdk.connectToRoom(params);
    }
    
    static async prepareVideoView(peerId) {
@@ -56,16 +56,16 @@ export default class SDK {
       sdk.switchCamera();
    }
    
-   static startRecording() {
-      return sdk.startRecording();
+   static async startRecording() {
+      await sdk.startRecording();
    }
    
-   static stopRecording() {
-      return sdk.stopRecording();
+   static async stopRecording() {
+      await sdk.stopRecording();
    }
    
-   static disconnectFromRoom() {
-      return sdk.disconnectFromRoom();
+   static async disconnectFromRoom() {
+      await sdk.disconnectFromRoom();
    }
 }
 

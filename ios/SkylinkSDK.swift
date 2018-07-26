@@ -19,6 +19,11 @@ let CAMERA_FRONT = "CAMERA_FRONT"
 let ILBC = "iLBC"
 let OPUS = "Opus"
 
+let STATE_CONNECTED = "STATE_CONNECTED"
+let STATE_DISCONNECTED = "STATE_DISCONNECTED"
+let STATE_CONNECTING = "STATE_CONNECTING"
+let STATE_DISCONNECTING = "STATE_DISCONNECTING"
+
 let ROOM_CONNECTED = "ROOM_CONNECTED"
 let ROOM_DISCONNECTED = "ROOM_DISCONNECTED"
 let LOCAL_VIDEO_CAPTURED = "LOCAL_VIDEO_CAPTURED"
@@ -28,8 +33,10 @@ let PEER_LEFT = "PEER_LEFT"
 @objc(SkylinkSDK) class SkylinkSDK :
    RCTEventEmitter,
    SKYLINKConnectionLifeCycleDelegate,
-   SKYLINKConnectionRemotePeerDelegate
+   SKYLINKConnectionRemotePeerDelegate,
+   SKYLINKConnectionRecordingDelegate
 {
+   private var state = STATE_DISCONNECTED
    private var connection: SKYLINKConnection?
    private var videoViews = [String: UIView]()
    
@@ -79,6 +86,12 @@ let PEER_LEFT = "PEER_LEFT"
                OPUS: OPUS
             ]
          ],
+         "skylinkState": [
+            STATE_CONNECTED: STATE_CONNECTED,
+            STATE_DISCONNECTED: STATE_DISCONNECTED,
+            STATE_CONNECTING: STATE_CONNECTING,
+            STATE_DISCONNECTING: STATE_DISCONNECTING
+         ],
          "events": [
             ROOM_CONNECTED: ROOM_CONNECTED,
             ROOM_DISCONNECTED: ROOM_DISCONNECTED,
@@ -90,6 +103,8 @@ let PEER_LEFT = "PEER_LEFT"
    }
    
    func connection(_ connection: SKYLINKConnection, didConnectWithMessage: String, success: Bool) {
+      state = STATE_CONNECTED
+      
       emit(ROOM_CONNECTED, [
          "isSuccessful": success,
          "message": didConnectWithMessage
@@ -103,6 +118,8 @@ let PEER_LEFT = "PEER_LEFT"
    }
    
    func connection(_ connection: SKYLINKConnection, didDisconnectWithMessage: String) {
+      state = STATE_DISCONNECTED
+      
       emit(ROOM_DISCONNECTED, [
          "message": didDisconnectWithMessage,
          "errorCode": -1])
@@ -125,6 +142,22 @@ let PEER_LEFT = "PEER_LEFT"
          "peerId": peerId,
          "message": didLeavePeerWithMessage
       ])
+   }
+   
+   func connection(_ connection: SKYLINKConnection, recordingDidStartWithID: String) {
+      NSLog("%@", "Recording did start: \(recordingDidStartWithID)")
+   }
+   
+   func connection(_ connection: SKYLINKConnection, recordingDidStopWithID: String) {
+      NSLog("%@", "Recording did stop: \(recordingDidStopWithID)")
+   }
+   
+   func connection(_ connection: SKYLINKConnection, recording: String, didError: String) {
+      NSLog("%@", "Recording did error: \(recording) \(didError)")
+   }
+   
+   func connection(_ connection: SKYLINKConnection, recordingVideoLink: String, peerId: String, recordingId: String) {
+      NSLog("%@", "Recording video link: \(recordingVideoLink) \(peerId) \(recordingId)")
    }
    
    @objc func initSDK(_ appKey: String, config: [String: Any], resolver: RCTPromiseResolveBlock, rejecter: RCTPromiseRejectBlock) {
@@ -183,6 +216,7 @@ let PEER_LEFT = "PEER_LEFT"
       
       connection!.lifeCycleDelegate = self
       connection!.remotePeerDelegate = self
+      connection!.recordingDelegate = self
       
       if let maxPeers = config["maxPeers"] as? Int {
          connection!.maxPeerCount = maxPeers
@@ -193,6 +227,10 @@ let PEER_LEFT = "PEER_LEFT"
    
    @objc func getCaptureFormats(_ videoDevice: String, resolver: RCTPromiseResolveBlock, rejecter: RCTPromiseRejectBlock) {
       resolver([String: Any]())
+   }
+   
+   @objc func getSkylinkState(_ resolver: RCTPromiseResolveBlock, rejecter: RCTPromiseRejectBlock) {
+      resolver(state)
    }
    
    @objc func connectToRoom(_ params: [String: Any], resolver: RCTPromiseResolveBlock, rejecter: RCTPromiseRejectBlock) {
@@ -210,7 +248,15 @@ let PEER_LEFT = "PEER_LEFT"
             result = connection!.connectToRoom(withSecret: secret, roomName: roomName, userInfo: userInfo)
          }
          
-         result == nil ? rejecter("", "Either 'connectionString' or 'secret / roomName' must be specified.", nil) : resolver(result)
+         if result == nil {
+            rejecter("", "Either 'connectionString' or 'secret / roomName' must be specified.", nil)
+         } else if !result! {
+            rejecter("", String(describing: result!), nil)
+         } else {
+            resolver(nil)
+            
+            state = STATE_CONNECTING
+         }
       }
    }
    
@@ -231,17 +277,33 @@ let PEER_LEFT = "PEER_LEFT"
       connection?.switchCamera()
    }
    
+   @objc func startRecording(_ resolver: RCTPromiseResolveBlock, rejecter: RCTPromiseRejectBlock) {
+      let error = connection!.startRecording()
+      
+      error == nil ? resolver(nil) : rejecter("", error, nil)
+   }
+   
+   @objc func stopRecording(_ resolver: RCTPromiseResolveBlock, rejecter: RCTPromiseRejectBlock) {
+      let error = connection!.stopRecording()
+      
+      error == nil ? resolver(nil) : rejecter("", error, nil)
+   }
+   
    @objc func disconnectFromRoom(_ resolver: RCTPromiseResolveBlock, rejecter: RCTPromiseRejectBlock) {
       if (isInitialized(rejecter)) {
+         state = STATE_DISCONNECTING
+         
          videoViews.removeAll()
          
          connection!.disconnect {
+            self.state = STATE_DISCONNECTED
+            
             self.emit(ROOM_DISCONNECTED, [
                "message": "User disconnected from the room",
                "errorCode": 15])
          }
          
-         resolver(true)
+         resolver(nil)
       }
    }
    

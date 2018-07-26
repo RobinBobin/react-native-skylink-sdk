@@ -23,6 +23,11 @@ RCT_EXTERN_METHOD(
    rejecter: (RCTPromiseRejectBlock)rejecter)
 
 RCT_EXTERN_METHOD(
+   getSkylinkState:
+   (RCTPromiseResolveBlock)resolver
+   rejecter: (RCTPromiseRejectBlock)rejecter)
+
+RCT_EXTERN_METHOD(
    connectToRoom:
    (NSDictionary *)params
    resolver: (RCTPromiseResolveBlock)resolver
@@ -35,6 +40,16 @@ RCT_EXTERN_METHOD(
    rejecter: (RCTPromiseRejectBlock)rejecter)
 
 RCT_EXTERN_METHOD(switchCamera)
+
+RCT_EXTERN_METHOD(
+   startRecording:
+   (RCTPromiseResolveBlock)resolver
+   rejecter: (RCTPromiseRejectBlock)rejecter)
+
+RCT_EXTERN_METHOD(
+   stopRecording:
+   (RCTPromiseResolveBlock)resolver
+   rejecter: (RCTPromiseRejectBlock)rejecter)
 
 RCT_EXTERN_METHOD(
    disconnectFromRoom:
