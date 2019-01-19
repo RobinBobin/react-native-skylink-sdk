@@ -17,6 +17,7 @@ import sg.com.temasys.skylink.sdk.rtc.SkylinkCaptureFormat;
 import sg.com.temasys.skylink.sdk.rtc.SkylinkConfig;
 import sg.com.temasys.skylink.sdk.rtc.SkylinkConnection;
 import sg.com.temasys.skylink.sdk.rtc.SkylinkConnection.SkylinkState;
+import sg.com.temasys.skylink.sdk.rtc.SkylinkException;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -26,11 +27,13 @@ import org.webrtc.SurfaceViewRenderer;
 import ru.rshalimov.reactnative.common.BaseModule;
 import ru.rshalimov.reactnative.common.MapBuilder;
 import ru.rshalimov.reactnative.common.ObjectPropertySetter;
+import ru.rshalimov.reactnative.common.Utils;
 
 import ru.rshalimov.reactnative.skylinksdk.listeners.LifeCycleListener;
 import ru.rshalimov.reactnative.skylinksdk.listeners.RemotePeerListener;
 import ru.rshalimov.reactnative.skylinksdk.listeners.MediaListener;
 import ru.rshalimov.reactnative.skylinksdk.listeners.RecordingListener;
+import ru.rshalimov.reactnative.skylinksdk.listeners.MessagesListener;
 
 public class Module extends BaseModule {
    public static final String TAG = "SkylinkSDK";
@@ -41,6 +44,7 @@ public class Module extends BaseModule {
    private final RemotePeerListener remotePeerListener = new RemotePeerListener();
    private final MediaListener mediaListener = new MediaListener();
    private final RecordingListener recordingListener = new RecordingListener();
+   private final MessagesListener messagesListener = new MessagesListener();
    
    Module(ReactApplicationContext reactContext) {
       super(reactContext);
@@ -95,9 +99,15 @@ public class Module extends BaseModule {
          .push("events")
             .put(LifeCycleListener.ROOM_CONNECTED)
             .put(LifeCycleListener.ROOM_DISCONNECTED)
+            .put(RemotePeerListener.PEER_JOINED)
+            .put(RemotePeerListener.PEER_LEFT)
             .put(MediaListener.LOCAL_VIDEO_CAPTURED)
             .put(MediaListener.REMOTE_VIDEO_RECEIVED)
-            .put(RemotePeerListener.PEER_LEFT)
+            .put(RecordingListener.RECORDING_ERROR)
+            .put(RecordingListener.RECORDING_STARTED)
+            .put(RecordingListener.RECORDING_STOPPED)
+            .put(RecordingListener.RECORDING_VIDEO_LINK)
+            .put(MessagesListener.MESSAGES_P2P_RECEIVED)
          .build();
    }
    
@@ -139,6 +149,7 @@ public class Module extends BaseModule {
          connection.setRemotePeerListener(remotePeerListener);
          connection.setMediaListener(mediaListener);
          connection.setRecordingListener(recordingListener);
+         connection.setMessagesListener(messagesListener);
          
          promise.resolve(null);
       } catch (Exception e) {
@@ -238,6 +249,22 @@ public class Module extends BaseModule {
    @ReactMethod
    public void stopRecording(Promise promise) {
       promise.resolve(SkylinkConnection.getInstance().stopRecording());
+   }
+   
+   @ReactMethod
+   public void sendP2PMessage(ReadableMap params, Promise promise) {
+      try {
+         Log.d(TAG, String.format("Sending a P2P message (%s).", params));
+         
+         final Map <String, Object> map = params.toHashMap();
+         final Object msg = map.get("message");
+         
+         SkylinkConnection.getInstance().sendP2PMessage((String)map.get("remotePeerId"), msg instanceof List ? new JSONArray((List <?>)msg) : msg instanceof Map ? new JSONObject((Map <?, ?>)msg) : msg);
+         
+         promise.resolve(null);
+      } catch (SkylinkException e) {
+         promise.reject("", e);
+      }
    }
    
    @ReactMethod

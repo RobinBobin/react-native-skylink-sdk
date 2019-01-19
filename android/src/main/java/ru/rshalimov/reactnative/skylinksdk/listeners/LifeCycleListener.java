@@ -10,19 +10,14 @@ import ru.rshalimov.reactnative.skylinksdk.Module;
 import android.util.Log;
 
 public class LifeCycleListener extends LifeCycleAdapter {
-   public static final String ROOM_CONNECTED;
-   public static final String ROOM_DISCONNECTED;
+   public static final String ROOM_CONNECTED = "ROOM_CONNECTED";
+   public static final String ROOM_DISCONNECTED = "ROOM_DISCONNECTED";
    
    private static final String TAG = "LifeCycleListener";
    
-   static {
-      ROOM_CONNECTED = "ROOM_CONNECTED";
-      ROOM_DISCONNECTED = "ROOM_DISCONNECTED";
-   }
-   
    @Override
    public void onConnect(boolean isSuccessful, String message) {
-      Log.d(TAG, String.format("onConnect() %s, %s", isSuccessful, message));
+      Log.d(TAG, String.format("onConnect(%s, %s).", isSuccessful, message));
       
       final WritableMap params = Arguments.createMap();
       
@@ -34,7 +29,7 @@ public class LifeCycleListener extends LifeCycleAdapter {
    
    @Override
    public void onDisconnect(int errorCode, String message) {
-      Log.d(TAG, String.format("onDisconnect() %d %s", errorCode, message));
+      Log.d(TAG, String.format("onDisconnect(%d, %s).", errorCode, message));
       
       final WritableMap params = Arguments.createMap();
       

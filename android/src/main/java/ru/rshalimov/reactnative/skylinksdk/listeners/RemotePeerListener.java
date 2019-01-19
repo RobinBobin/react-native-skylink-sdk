@@ -11,12 +11,26 @@ import ru.rshalimov.reactnative.skylinksdk.Module;
 import android.util.Log;
 
 public class RemotePeerListener extends RemotePeerAdapter {
-   public static final String PEER_LEFT;
+   public static final String PEER_JOINED = "PEER_JOINED";
+   public static final String PEER_LEFT = "PEER_LEFT";
    
    private static final String TAG = "RemotePeerListener";
    
-   static {
-      PEER_LEFT = "PEER_LEFT";
+   @Override
+   public void onRemotePeerJoin(
+      String remotePeerId,
+      Object userData,
+      boolean hasDataChannel)
+   {
+      Log.d(TAG, String.format("onRemotePeerJoin(%s, %s, %s).", remotePeerId, userData, hasDataChannel));
+      
+      final WritableMap params = Arguments.createMap();
+      
+      params.putString("peerId", remotePeerId);
+      //params.put("userData", TODO);
+      params.putBoolean("hasDataChannel", hasDataChannel);
+      
+      Module.getInstance().emit(PEER_JOINED, params);
    }
    
    @Override
@@ -25,7 +39,7 @@ public class RemotePeerListener extends RemotePeerAdapter {
       String message,
       UserInfo userInfo)
    {
-      Log.d(TAG, String.format("onRemotePeerLeave(%s, %s, %s)",
+      Log.d(TAG, String.format("onRemotePeerLeave(%s, %s, %s).",
          remotePeerId, message, userInfo));
       
       final WritableMap params = Arguments.createMap();

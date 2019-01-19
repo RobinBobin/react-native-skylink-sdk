@@ -12,15 +12,10 @@ import ru.rshalimov.reactnative.skylinksdk.Module;
 import android.util.Log;
 
 public class MediaListener extends MediaAdapter {
-   public static final String LOCAL_VIDEO_CAPTURED;
-   public static final String REMOTE_VIDEO_RECEIVED;
+   public static final String LOCAL_VIDEO_CAPTURED = "LOCAL_VIDEO_CAPTURED";
+   public static final String REMOTE_VIDEO_RECEIVED = "REMOTE_VIDEO_RECEIVED";
    
    private static final String TAG = "MediaListener";
-   
-   static {
-      LOCAL_VIDEO_CAPTURED = "LOCAL_VIDEO_CAPTURED";
-      REMOTE_VIDEO_RECEIVED = "REMOTE_VIDEO_RECEIVED";
-   }
    
    @Override
    public void onLocalMediaCapture(SurfaceViewRenderer videoView) {
@@ -33,10 +28,11 @@ public class MediaListener extends MediaAdapter {
    public void onRemotePeerMediaReceive(
       String remotePeerId, SurfaceViewRenderer videoView)
    {
-      Log.d(TAG, String.format("onRemotePeerMediaReceive(%s)", remotePeerId));
+      Log.d(TAG, String.format("onRemotePeerMediaReceive(%s).", remotePeerId));
+      
       final WritableMap params = Arguments.createMap();
       
-      params.putString("remotePeerId", remotePeerId);
+      params.putString("peerId", remotePeerId);
       
       Module.getInstance().emit(REMOTE_VIDEO_RECEIVED, params);
    }

@@ -64,6 +64,14 @@ export default class SDK {
       await sdk.stopRecording();
    }
    
+   /*
+      remotePeerId: String | null,
+      message: String | [] | {}
+   */
+   static async sendP2PMessage(remotePeerId, message) {
+      await sdk.sendP2PMessage({remotePeerId, message});
+   }
+   
    static async disconnectFromRoom() {
       await sdk.disconnectFromRoom();
    }
